@@ -15,7 +15,8 @@ import { Observable, Observer, Subject } from 'rxjs';
 import * as Keycloak_ from 'keycloak-js';
 export const Keycloak = Keycloak_;
 
-import { ExcludedUrl, ExcludedUrlRegex, KeycloakOptions } from '../interfaces/keycloak-options';
+import { ExcludedUrl, ExcludedUrlRegex, IncludedUrl, IncludedUrlRegex,
+   KeycloakOptions } from '../interfaces/keycloak-options';
 import { KeycloakEvent, KeycloakEventType } from '../interfaces/keycloak-event';
 
 /**
@@ -61,6 +62,11 @@ export class KeycloakService {
    * The excluded urls patterns that must skip the KeycloakBearerInterceptor.
    */
   private _excludedUrls: ExcludedUrlRegex[];
+  /**
+   * The excluded urls patterns that must skip the KeycloakBearerInterceptor.
+   */
+  private _includedUrls: IncludedUrlRegex[];
+
   /**
    * Observer for the keycloak events
    */
@@ -140,6 +146,30 @@ export class KeycloakService {
   }
 
   /**
+   * Loads all bearerExcludedUrl content in a uniform type: IncludedUrl,
+   * so it becomes easier to handle.
+   *
+   * @param bearerExcludedUrls array of strings or IncludedUrl that includes
+   * the url and HttpMethod.
+   */
+  private loadIncludedUrls(bearerIncludedUrls: (string | IncludedUrl)[]): IncludedUrlRegex[] {
+    const includedUrls: IncludedUrlRegex[] = [];
+    for (const item of bearerIncludedUrls) {
+      let includedUrl: IncludedUrlRegex;
+      if (typeof item === 'string') {
+        includedUrl = { urlPattern: new RegExp(item, 'i'), httpMethods: [] };
+      } else {
+        includedUrl = {
+          urlPattern: new RegExp(item.url, 'i'),
+          httpMethods: item.httpMethods
+        };
+      }
+      includedUrls.push(includedUrl);
+    }
+    return includedUrls;
+  }
+
+  /**
    * Handles the class values initialization.
    *
    * @param options
@@ -148,6 +178,7 @@ export class KeycloakService {
     enableBearerInterceptor = true,
     loadUserProfileAtStartUp = true,
     bearerExcludedUrls = [],
+    bearerIncludedUrls = [""],
     authorizationHeaderName = 'Authorization',
     bearerPrefix = 'bearer',
     initOptions
@@ -157,6 +188,7 @@ export class KeycloakService {
     this._authorizationHeaderName = authorizationHeaderName;
     this._bearerPrefix = bearerPrefix.trim().concat(' ');
     this._excludedUrls = this.loadExcludedUrls(bearerExcludedUrls);
+    this._includedUrls = this.loadIncludedUrls(bearerIncludedUrls);
     this._silentRefresh = initOptions ? initOptions.flow === 'implicit' : false;
   }
 
@@ -551,6 +583,17 @@ export class KeycloakService {
    */
   get excludedUrls(): ExcludedUrlRegex[] {
     return this._excludedUrls;
+  }
+
+    /**
+   * Returns the included URLs that should not be considered by
+   * the http interceptor which automatically adds the authorization header in the Http Request.
+   *
+   * @returns
+   * The excluded urls that must not be intercepted by the KeycloakBearerInterceptor.
+   */
+  get includedUrls(): ExcludedUrlRegex[] {
+    return this.includedUrls;
   }
 
   /**
