@@ -79,7 +79,6 @@ export class KeycloakBearerInterceptor implements HttpInterceptor {
         const kcReq = req.clone({ headers: headersWithBearer });
         return next.handle(kcReq);
       })
-    )
+    );
   }
 }
-
