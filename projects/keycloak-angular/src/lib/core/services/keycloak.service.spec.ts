@@ -24,12 +24,12 @@ describe('KeycloakService', () => {
     }
   ));
 
-  describe('#loadExcludedUrls', () => {
-    it('Should create the ExcludedUrlRegex objects if the bearerExcludedUrls arg is a string array', inject(
+  describe('#loadIncludedUrls', () => {
+    it('Should create the IncludedUrlRegex objects if the bearerIncludedUrls arg is a string array', inject(
       [KeycloakService],
       (service: KeycloakService) => {
-        const loadExcludedUrls = service['loadExcludedUrls'];
-        const result = loadExcludedUrls(['home', 'public']);
+        const loadIncludedUrls = service['loadIncludedUrls'];
+        const result = loadIncludedUrls(['home', 'public']);
         let { urlPattern, httpMethods } = result[0];
 
         expect(result.length).toBe(2);
@@ -39,28 +39,28 @@ describe('KeycloakService', () => {
       }
     ));
 
-    it('Should create the ExcludedUrlRegex objects if the bearerExcludedUrls arg is an mixed array of strings and ExcludedUrl objects', inject(
+    it('Should create the IncludedUrlRegex objects if the bearerIncludedUrls arg is an mixed array of strings and IncludedUrl objects', inject(
       [KeycloakService],
       (service: KeycloakService) => {
-        const loadExcludedUrls = service['loadExcludedUrls'];
-        const result = loadExcludedUrls([
+        const loadIncludedUrls = service['loadIncludedUrls'];
+        const result = loadIncludedUrls([
           'home',
           { url: 'public', httpMethods: ['GET'] }
         ]);
         expect(result.length).toBe(2);
 
-        let excludedRegex1 = result[0];
-        expect(excludedRegex1.urlPattern).toBeDefined();
-        expect(excludedRegex1.urlPattern.test('https://url/home')).toBeTruthy();
-        expect(excludedRegex1.httpMethods.length).toBe(0);
+        let includedRegex1 = result[0];
+        expect(includedRegex1.urlPattern).toBeDefined();
+        expect(includedRegex1.urlPattern.test('https://url/home')).toBeTruthy();
+        expect(includedRegex1.httpMethods.length).toBe(0);
 
-        let excludedRegex2 = result[1];
-        expect(excludedRegex2.urlPattern).toBeDefined();
+        let includedRegex2 = result[1];
+        expect(includedRegex2.urlPattern).toBeDefined();
         expect(
-          excludedRegex2.urlPattern.test('https://url/public')
+          includedRegex2.urlPattern.test('https://url/public')
         ).toBeTruthy();
-        expect(excludedRegex2.httpMethods.length).toBe(1);
-        expect(excludedRegex2.httpMethods[0]).toBe('GET');
+        expect(includedRegex2.httpMethods.length).toBe(1);
+        expect(includedRegex2.httpMethods[0]).toBe('GET');
       }
     ));
   });
