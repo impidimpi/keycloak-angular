@@ -21,10 +21,10 @@ import { KeycloakService } from '../services/keycloak.service';
 import { IncludedUrlRegex } from '../interfaces/keycloak-options';
 
 /**
- * This interceptor includes the bearer by default in all HttpClient requests.
+ * This interceptor does not include the bearer by default in HttpClient requests.
  *
- * If you need to exclude some URLs from adding the bearer, please, take a look
- * at the {@link KeycloakOptions} bearerExcludedUrls property.
+ * If you need to include URLs that will have the bearer, please, take a look
+ * at the {@link KeycloakOptions} bearerIncludedUrls property.
  */
 @Injectable()
 export class KeycloakBearerInterceptor implements HttpInterceptor {
